@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profile • Stegano-Cipher</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes gridShift { 0% { background-position: 0 0, 0 0; } 100% { background-position: 0 20px, 20px 0; } }
+    @keyframes scan { 0% { background-position-y: 0; } 100% { background-position-y: 100%; } }
+  </style>
+</head>
+<body class="text-white relative">
+  <div class="absolute inset-0 -z-10">
+    <div class="h-full w-full" style="background: radial-gradient(ellipse at center, #0a0f1f 0%, #050914 40%, #02040a 100%);"></div>
+    <div class="absolute inset-0 opacity-30" style="background-image: repeating-linear-gradient(0deg, rgba(0,240,255,0.08) 0 2px, transparent 2px 20px), repeating-linear-gradient(90deg, rgba(255,0,255,0.06) 0 2px, transparent 2px 20px); background-size: 100% 100%; animation: gridShift 12s linear infinite;"></div>
+    <div class="absolute inset-0" style="background-image: linear-gradient(transparent, rgba(255,255,255,0.03) 50%, transparent); background-size: 100% 4px; animation: scan 6s linear infinite;"></div>
+  </div>
+  <div class="max-w-3xl mx-auto py-8 px-4 pb-16">
+    <div class="flex items-center justify-between">
+      <h1 class="leading-tight">
+        <span class="block text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent" style="background-image: linear-gradient(90deg,#00f0ff,#ff00ff)">Profile</span>
+        <span class="block text-cyan-200 md:text-lg">{{ user.name }}</span>
+      </h1>
+      <div class="flex items-center gap-3 text-sm">
+        <a href="/profile" class="h-8 w-8 rounded-full bg-cyan-600 text-white flex items-center justify-center font-semibold">
+          {{ (user.name if user else '')[:1]|upper }}
+        </a>
+        <div class="flex items-center gap-2 rounded-xl border border-cyan-400/60 bg-black/40 backdrop-blur px-2 py-1 shadow-[0_0_12px_#00f0ff]">
+          <a href="/" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Home</a>
+          <a href="/history" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">History</a>
+          {% if user and (user.role == 'admin') %}
+          <a href="/admin/history" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Admin</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-black/60 backdrop-blur border-t border-cyan-400/60">
+      <div class="max-w-3xl mx-auto px-4 py-2 flex justify-end">
+        <a href="/logout" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-4 py-2 text-cyan-200 hover:bg-cyan-300 hover:text-black">Logout</a>
+      </div>
+    </div>
+
+    {% if error %}
+      <div class="mt-4 bg-rose-500/20 text-rose-300 rounded p-2">{{ error }}</div>
+    {% endif %}
+    {% if msg %}
+      <div class="mt-4 bg-emerald-500/20 text-emerald-300 rounded p-2">{{ msg }}</div>
+    {% endif %}
+
+    <div class="mt-6 grid md:grid-cols-2 gap-6">
+      <div class="bg-black/50 backdrop-blur rounded shadow-[0_0_24px_#00f0ff] ring-1 ring-cyan-400/50 p-4">
+        <h2 class="text-lg font-semibold">Basic Details</h2>
+        <form method="post" class="mt-3 space-y-3">
+          <div>
+            <label class="block text-sm text-cyan-200">Email</label>
+            <input type="email" value="{{ user.email }}" class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2" disabled />
+          </div>
+          <div>
+            <label class="block text-sm text-cyan-200">Name</label>
+            <input name="name" type="text" value="{{ user.name }}" class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+          </div>
+          <button class="rounded px-3 py-2 border border-cyan-400 text-cyan-200 hover:text-black hover:bg-cyan-300 transition shadow-[0_0_12px_#00f0ff]">Update Name</button>
+        </form>
+      </div>
+
+      <div class="bg-black/50 backdrop-blur rounded shadow-[0_0_24px_#00f0ff] ring-1 ring-cyan-400/50 p-4">
+        <h2 class="text-lg font-semibold">Change Password</h2>
+        <form method="post" class="mt-3 space-y-3">
+          <div>
+            <label class="block text-sm text-cyan-200">Current Password</label>
+            <input name="current_password" type="password" class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+          </div>
+          <div>
+            <label class="block text-sm text-cyan-200">New Password</label>
+            <input name="new_password" type="password" class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+          </div>
+          <button class="rounded px-3 py-2 border border-cyan-400 text-cyan-200 hover:text-black hover:bg-cyan-300 transition shadow-[0_0_12px_#00f0ff]">Update Password</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="mt-6 grid md:grid-cols-2 gap-6">
+      <div class="bg-black/50 backdrop-blur rounded shadow-[0_0_24px_#00f0ff] ring-1 ring-cyan-400/50 p-4">
+        <h2 class="text-lg font-semibold">Admin Access</h2>
+        <form method="post" class="mt-3 space-y-3">
+          <div>
+            <label class="block text-sm text-cyan-200">Admin Invite Code</label>
+            <input name="admin_code" type="text" class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+          </div>
+          <button class="rounded px-3 py-2 border border-cyan-400 text-cyan-200 hover:text-black hover:bg-cyan-300 transition shadow-[0_0_12px_#00f0ff]">Upgrade to Admin</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
