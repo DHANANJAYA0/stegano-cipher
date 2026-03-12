@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin History • Stegano-Cipher</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes gridShift { 0% { background-position: 0 0, 0 0; } 100% { background-position: 0 20px, 20px 0; } }
+    @keyframes scan { 0% { background-position-y: 0; } 100% { background-position-y: 100%; } }
+  </style>
+</head>
+<body class="text-white relative">
+  <div class="absolute inset-0 -z-10">
+    <div class="h-full w-full" style="background: radial-gradient(ellipse at center, #0a0f1f 0%, #050914 40%, #02040a 100%);"></div>
+    <div class="absolute inset-0 opacity-30" style="background-image: repeating-linear-gradient(0deg, rgba(0,240,255,0.08) 0 2px, transparent 2px 20px), repeating-linear-gradient(90deg, rgba(255,0,255,0.06) 0 2px, transparent 2px 20px); background-size: 100% 100%; animation: gridShift 12s linear infinite;"></div>
+    <div class="absolute inset-0" style="background-image: linear-gradient(transparent, rgba(255,255,255,0.03) 50%, transparent); background-size: 100% 4px; animation: scan 6s linear infinite;"></div>
+  </div>
+  <div class="max-w-5xl mx-auto py-8 px-4">
+    <div class="flex items-center justify-between">
+      <h1 class="leading-tight">
+        <span class="block text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent" style="background-image: linear-gradient(90deg,#00f0ff,#ff00ff)">Admin</span>
+        <span class="block text-cyan-200 md:text-lg">History overview</span>
+      </h1>
+      <div class="flex items-center gap-3 text-sm">
+        <a href="/profile" class="h-8 w-8 rounded-full bg-cyan-600 text-white flex items-center justify-center font-semibold">
+          {{ (user.name if user else '')[:1]|upper }}
+        </a>
+        <div class="flex items-center gap-2 rounded-xl border border-cyan-400/60 bg-black/40 backdrop-blur px-2 py-1 shadow-[0_0_12px_#00f0ff]">
+          <a href="/" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Home</a>
+          <a href="/history" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">History</a>
+          <a href="/admin/history" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Admin</a>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6">
+      <form method="get" action="/admin/history" class="mb-2 flex items-center gap-2 text-sm">
+        <label class="text-cyan-200">Items per page</label>
+        <select name="limit" class="rounded border border-cyan-400/60 bg-black/40 text-white p-1">
+          <option value="20" {{ 'selected' if limit == 20 else '' }}>20</option>
+          <option value="50" {{ 'selected' if limit == 50 else '' }}>50</option>
+          <option value="100" {{ 'selected' if limit == 100 else '' }}>100</option>
+        </select>
+        <input type="hidden" name="page" value="1" />
+        <button class="rounded border border-cyan-400 px-2 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Apply</button>
+      </form>
+      <div class="overflow-auto">
+        <table class="min-w-full bg-black/50 backdrop-blur rounded shadow-[0_0_24px_#00f0ff] ring-1 ring-cyan-400/50">
+          <thead>
+            <tr class="text-left border-b border-cyan-400/40">
+              <th class="p-2">ID</th>
+              <th class="p-2">Email</th>
+              <th class="p-2">Type</th>
+              <th class="p-2">Cover</th>
+              <th class="p-2">Stego</th>
+              <th class="p-2">Method</th>
+              <th class="p-2">Length</th>
+              <th class="p-2">Time</th>
+              <th class="p-2">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for it in items %}
+            <tr class="border-b border-cyan-400/20 text-sm">
+              <td class="p-2">{{ it.id }}</td>
+              <td class="p-2">{{ it.email }}</td>
+              <td class="p-2">{{ it.type }}</td>
+              <td class="p-2">{{ it.cover }}</td>
+              <td class="p-2">{{ it.stego }}</td>
+              <td class="p-2">{{ it.method }}</td>
+              <td class="p-2">{{ it.length }}</td>
+              <td class="p-2">{{ it.time }}</td>
+              <td class="p-2">
+                <form method="post" action="/admin/history/delete/{{ it.id }}">
+                  <button class="text-rose-300">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if pages and pages > 1 %}
+        <div class="mt-4 flex justify-center">
+          {% for p in range(1, pages + 1) %}
+          <a href="/admin/history?page={{ p }}&limit={{ limit }}" class="px-3 py-1 mx-1 rounded border {{ 'bg-cyan-600 text-white' if p == page else 'bg-black/40 text-cyan-200 border-cyan-400' }}">{{ p }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>History • Stegano-Cipher</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes gridShift { 0% { background-position: 0 0, 0 0; } 100% { background-position: 0 20px, 20px 0; } }
+    @keyframes scan { 0% { background-position-y: 0; } 100% { background-position-y: 100%; } }
+  </style>
+</head>
+<body class="text-white relative">
+  <div class="absolute inset-0 -z-10">
+    <div class="h-full w-full" style="background: radial-gradient(ellipse at center, #0a0f1f 0%, #050914 40%, #02040a 100%);"></div>
+    <div class="absolute inset-0 opacity-30" style="background-image: repeating-linear-gradient(0deg, rgba(0,240,255,0.08) 0 2px, transparent 2px 20px), repeating-linear-gradient(90deg, rgba(255,0,255,0.06) 0 2px, transparent 2px 20px); background-size: 100% 100%; animation: gridShift 12s linear infinite;"></div>
+    <div class="absolute inset-0" style="background-image: linear-gradient(transparent, rgba(255,255,255,0.03) 50%, transparent); background-size: 100% 4px; animation: scan 6s linear infinite;"></div>
+  </div>
+  <div class="max-w-4xl mx-auto py-8 px-4">
+    <div class="flex items-center justify-between">
+      <h1 class="leading-tight">
+        <span class="block text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent" style="background-image: linear-gradient(90deg,#00f0ff,#ff00ff)">History</span>
+        <span class="block text-cyan-200 md:text-lg">Your activity and actions</span>
+      </h1>
+      <div class="flex items-center gap-3 text-sm">
+        <a href="/profile" class="h-8 w-8 rounded-full bg-cyan-600 text-white flex items-center justify-center font-semibold">
+          {{ (user.name if user else '')[:1]|upper }}
+        </a>
+        <div class="flex items-center gap-2 rounded-xl border border-cyan-400/60 bg-black/40 backdrop-blur px-2 py-1 shadow-[0_0_12px_#00f0ff]">
+          <a href="/" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Home</a>
+          <a href="/history" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">History</a>
+          {% if user and (user.role == 'admin') %}
+          <a href="/admin/history" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Admin</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <form method="post" action="/history/clear" class="mt-4">
+      <button class="rounded px-3 py-1 border border-cyan-400 text-cyan-200 hover:text-black hover:bg-cyan-300 transition">Clear My History</button>
+    </form>
+    <form method="get" action="/history" class="mt-2 flex items-center gap-2 text-sm">
+      <label class="text-cyan-200">Items per page</label>
+      <select name="limit" class="rounded border border-cyan-400/60 bg-black/40 text-white p-1">
+        <option value="10" {{ 'selected' if limit == 10 else '' }}>10</option>
+        <option value="20" {{ 'selected' if limit == 20 else '' }}>20</option>
+        <option value="50" {{ 'selected' if limit == 50 else '' }}>50</option>
+      </select>
+      <input type="hidden" name="page" value="1" />
+      <button class="rounded border border-cyan-400 px-2 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Apply</button>
+    </form>
+    <div class="mt-4 space-y-3">
+      {% if items and items|length > 0 %}
+        {% for it in items %}
+        <div class="bg-black/50 backdrop-blur rounded shadow-[0_0_24px_#00f0ff] ring-1 ring-cyan-400/50 p-3">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold">{{ it.type|capitalize }}</div>
+            <div class="text-xs text-cyan-200">{{ it.time }}</div>
+          </div>
+          <div class="text-sm mt-2">
+            {% if it.type == 'hide' %}
+              <div>Cover: {{ it.cover }}</div>
+              <div>Method: {{ it.method }}</div>
+              <div>Text Length: {{ it.length }}</div>
+            {% else %}
+              <div>Stego: {{ it.stego }}</div>
+              <div>Recovered Length: {{ it.length }}</div>
+            {% endif %}
+          </div>
+          <form method="post" action="/history/delete/{{ it.id }}" class="mt-2">
+            <button class="text-rose-300 text-sm">Delete</button>
+          </form>
+        </div>
+        {% endfor %}
+        {% if pages and pages > 1 %}
+        <div class="mt-4 flex justify-center">
+          {% for p in range(1, pages + 1) %}
+          <a href="/history?page={{ p }}&limit={{ limit }}" class="px-3 py-1 mx-1 rounded border {{ 'bg-indigo-600 text-white' if p == page else 'bg-white text-slate-700' }}">{{ p }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% else %}
+        <div class="text-cyan-200">No history yet.</div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

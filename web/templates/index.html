@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stegano-Cipher Web</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes gridShift { 0% { background-position: 0 0, 0 0; } 100% { background-position: 0 20px, 20px 0; } }
+    @keyframes scan { 0% { background-position-y: 0; } 100% { background-position-y: 100%; } }
+  </style>
+</head>
+<body class="text-white relative">
+  <div class="absolute inset-0 -z-10">
+    <div class="h-full w-full" style="background: radial-gradient(ellipse at center, #0a0f1f 0%, #050914 40%, #02040a 100%);"></div>
+    <div class="absolute inset-0 opacity-30" style="background-image: repeating-linear-gradient(0deg, rgba(0,240,255,0.08) 0 2px, transparent 2px 20px), repeating-linear-gradient(90deg, rgba(255,0,255,0.06) 0 2px, transparent 2px 20px); background-size: 100% 100%; animation: gridShift 12s linear infinite;"></div>
+    <div class="absolute inset-0" style="background-image: linear-gradient(transparent, rgba(255,255,255,0.03) 50%, transparent); background-size: 100% 4px; animation: scan 6s linear infinite;"></div>
+  </div>
+  <div class="max-w-5xl mx-auto py-8 px-4" id="appRoot">
+    <div class="flex items-center justify-between">
+      <h1 class="leading-tight">
+        <span class="block text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent" style="background-image: linear-gradient(90deg,#00f0ff,#ff00ff)">Stegano-Cipher</span>
+        <span class="block text-cyan-200 md:text-xl font-medium">Robust Image Steganography with AES-256-GCM</span>
+      </h1>
+      <div class="flex items-center gap-3 text-sm">
+        <a href="/profile" class="h-8 w-8 rounded-full bg-cyan-600 text-white flex items-center justify-center font-semibold">
+          {{ (user.name if user else '')[:1]|upper }}
+        </a>
+        <div class="flex items-center gap-2 rounded-xl border border-cyan-400/60 bg-black/40 backdrop-blur px-2 py-1 shadow-[0_0_12px_#00f0ff]">
+          <a href="/history" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">History</a>
+          {% if user and (user.role == 'admin') %}
+          <a href="/admin/history" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Admin</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <p class="text-cyan-200 mt-2">Hide and extract messages in images in your browser</p>
+
+    <div id="toast" class="fixed top-4 right-4 hidden bg-black/80 text-white rounded px-3 py-2 text-sm"></div>
+
+    <div class="mt-6 grid md:grid-cols-2 gap-6">
+      <div class="bg-black/50 backdrop-blur rounded-lg shadow-[0_0_24px_#00f0ff] ring-1 ring-cyan-400/50 p-4" id="hideCard">
+        <h2 class="text-lg font-semibold">Hide Text</h2>
+        <div class="mt-3">
+          <label class="block text-sm text-cyan-200">Cover Image</label>
+          <div id="coverDrop" class="mt-1 w-full border-2 border-dashed rounded p-4 text-center text-cyan-200 border-cyan-400/60">Drag & drop image here or click to select</div>
+          <input id="cover" type="file" accept="image/*" class="hidden" />
+          <img id="coverPreview" class="mt-3 w-full max-h-64 object-contain hidden" />
+          <div id="capacityInfo" class="text-xs text-cyan-200 mt-2">Capacity: —</div>
+          <div id="capacityWarn" class="mt-2 hidden bg-rose-500/20 text-rose-300 rounded px-2 py-1 text-xs">Secret text may exceed image capacity</div>
+            <div class="mt-2 grid md:grid-cols-2 gap-2 text-xs">
+              <label class="inline-flex items-center gap-2"><input id="autoCompress" type="checkbox" class="accent-cyan-400" checked /><span class="text-cyan-200">Auto-resize/compress</span></label>
+              <div class="flex items-center gap-2"><span class="text-cyan-200">Max size</span><input id="maxDim" type="number" value="1600" class="w-20 rounded border border-cyan-400/60 bg-black/40 text-white p-1" /></div>
+            </div>
+        </div>
+        <div class="mt-3">
+          <label class="block text-sm text-cyan-200">Secret Text</label>
+          <textarea id="secretText" class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" rows="6"></textarea>
+          <div id="textCount" class="text-xs text-cyan-200 mt-1">0 chars</div>
+          <div class="mt-2 flex items-center gap-2">
+            <button id="selectTextBtn" class="rounded px-2 py-1 border border-cyan-400 text-cyan-200 hover:bg-cyan-300 hover:text-black">Select Text File</button>
+            <span id="textFileName" class="text-xs text-cyan-200"></span>
+            <input id="textFile" type="file" accept="text/plain,.txt" class="hidden" />
+          </div>
+        </div>
+        <div class="mt-3 grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm text-cyan-200">Password</label>
+            <input id="passwordHide" type="password" class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+          </div>
+          <div>
+            <label class="block text-sm text-cyan-200">Method</label>
+            <select id="method" class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+              <option value="lsb">Robust (LSB)</option>
+              <option value="dct">DCT (experimental)</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-3 grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm text-cyan-200">Delta</label>
+            <input id="delta" type="number" step="0.1" value="2.0" class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+          </div>
+          <div id="qualityGroup">
+            <label class="block text-sm text-cyan-200">Output Quality (JPEG/WEBP)</label>
+            <div class="flex items-center gap-2 mt-1">
+              <input id="qualitySlider" type="range" min="60" max="100" step="1" value="92" class="flex-1" />
+              <span id="qualityLabel" class="text-cyan-200">92</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3">
+          <label class="block text-sm text-cyan-200">Output Format</label>
+          <select id="outFormat" class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2">
+            <option value="png" selected>PNG (lossless)</option>
+            <option value="jpg">JPEG</option>
+            <option value="webp">WEBP</option>
+          </select>
+        </div>
+        <button id="hideBtn" class="mt-4 w-full rounded p-2 border border-cyan-400 text-cyan-200 hover:text-black hover:bg-cyan-300 transition shadow-[0_0_12px_#00f0ff]">Hide & Download Stego</button>
+        <div id="hideProgress" class="mt-2 hidden">
+          <div class="h-2 bg-black/40 border border-cyan-400/60 rounded">
+            <div id="hideProgressBar" class="h-2 bg-cyan-400 rounded" style="width:0%"></div>
+          </div>
+          <div id="hideProgressText" class="text-xs text-cyan-200 mt-1">0%</div>
+        </div>
+        <div id="hideMsg" class="mt-2 text-sm"></div>
+        <img id="stegoPreviewOut" class="mt-3 w-full max-h-64 object-contain hidden" />
+        <a id="downloadLink" href="#" download="stego.png" class="hidden mt-2 inline-block rounded px-3 py-1 border border-cyan-400 text-cyan-200 hover:text-black hover:bg-cyan-300">Download again</a>
+      </div>
+
+      <div class="bg-black/50 backdrop-blur rounded-lg shadow-[0_0_24px_#00f0ff] ring-1 ring-cyan-400/50 p-4" id="extractCard">
+        <h2 class="text-lg font-semibold">Extract Text</h2>
+        <div class="mt-3">
+          <label class="block text-sm text-cyan-200">Stego Image</label>
+          <div id="stegoDrop" class="mt-1 w-full border-2 border-dashed rounded p-4 text-center text-cyan-200 border-cyan-400/60">Drag & drop image here or click to select</div>
+          <input id="stego" type="file" accept="image/*" class="hidden" />
+          <img id="stegoPreview" class="mt-3 w-full max-h-64 object-contain hidden" />
+        </div>
+        <div class="mt-3">
+          <label class="block text-sm text-cyan-200">Password</label>
+          <input id="passwordExtract" type="password" class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+        </div>
+        <button id="extractBtn" class="mt-4 w-full rounded p-2 border border-cyan-400 text-cyan-200 hover:text-black hover:bg-cyan-300 transition shadow-[0_0_12px_#00f0ff]">Extract</button>
+        <div id="extractProgress" class="mt-2 hidden">
+          <div class="h-2 bg-black/40 border border-cyan-400/60 rounded">
+            <div id="extractProgressBar" class="h-2 bg-cyan-400 rounded" style="width:0%"></div>
+          </div>
+          <div id="extractProgressText" class="text-xs text-cyan-200 mt-1">0%</div>
+        </div>
+        <div class="mt-3">
+          <div class="flex gap-2 mb-2">
+            <button id="copyText" class="rounded px-2 py-1 border border-cyan-400 text-cyan-200 hover:bg-cyan-300 hover:text-black">Copy</button>
+            <button id="saveText" class="rounded px-2 py-1 border border-cyan-400 text-cyan-200 hover:bg-cyan-300 hover:text-black">Save .txt</button>
+          </div>
+          <div id="resultText" class="whitespace-pre-wrap rounded border border-cyan-400/60 bg-black/40 text-white p-3 min-h-24"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const cover = document.getElementById('cover');
+    const coverPreview = document.getElementById('coverPreview');
+    const coverDrop = document.getElementById('coverDrop');
+    const capacityInfo = document.getElementById('capacityInfo');
+    const stego = document.getElementById('stego');
+    const stegoPreview = document.getElementById('stegoPreview');
+    const stegoDrop = document.getElementById('stegoDrop');
+    const secretText = document.getElementById('secretText');
+    const textCount = document.getElementById('textCount');
+    const hideBtn = document.getElementById('hideBtn');
+    const extractBtn = document.getElementById('extractBtn');
+    const hideMsg = document.getElementById('hideMsg');
+    const resultText = document.getElementById('resultText');
+    const toast = document.getElementById('toast');
+    const stegoPreviewOut = document.getElementById('stegoPreviewOut');
+    const downloadLink = document.getElementById('downloadLink');
+    const copyText = document.getElementById('copyText');
+    const saveText = document.getElementById('saveText');
+    const selectTextBtn = document.getElementById('selectTextBtn');
+    const textFile = document.getElementById('textFile');
+    const textFileName = document.getElementById('textFileName');
+    const hideProgress = document.getElementById('hideProgress');
+    const hideProgressBar = document.getElementById('hideProgressBar');
+    const hideProgressText = document.getElementById('hideProgressText');
+    const extractProgress = document.getElementById('extractProgress');
+    const extractProgressBar = document.getElementById('extractProgressBar');
+    const extractProgressText = document.getElementById('extractProgressText');
+    const capacityWarn = document.getElementById('capacityWarn');
+    const autoCompress = document.getElementById('autoCompress');
+    const maxDim = document.getElementById('maxDim');
+    const qualityGroup = document.getElementById('qualityGroup');
+    const qualitySlider = document.getElementById('qualitySlider');
+    const qualityLabel = document.getElementById('qualityLabel');
+    let coverOverrideBlob = null;
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 2000);
+    }
+
+    function setLoading(btn, loading) {
+      btn.disabled = loading;
+      btn.classList.toggle('opacity-60', loading);
+      btn.textContent = loading ? (btn === hideBtn ? 'Processing…' : 'Extracting…') : (btn === hideBtn ? 'Hide & Download Stego' : 'Extract');
+    }
+
+    function mapHideError(code) {
+      if (code === 'type') return 'Only image files are allowed';
+      if (code === 'size') return 'Image too large';
+      if (code === 'missing inputs') return 'Provide image, password, text';
+      return 'Hide failed';
+    }
+    function mapExtractError(code) {
+      if (code === 'type') return 'Only image files are allowed';
+      if (code === 'size') return 'Image too large';
+      if (code === 'missing inputs') return 'Provide image and password';
+      if (code === 'header') return 'No embedded header found';
+      if (code === 'decrypt') return 'Wrong password or corrupted image';
+      return 'Error extracting';
+    }
+
+    function utf8Length(str) { return new TextEncoder().encode(str).length; }
+    function lsbCapacity(w, h) { return Math.floor((w * h) / 8); }
+    function dctCapacity(w, h) {
+      const blocks = Math.floor(w / 8) * Math.floor(h / 8);
+      const maskCount = 22; // sums 3..6 in 8x8 excluding DC
+      return Math.floor((blocks * maskCount) / 8);
+    }
+    const MAX_HIDE = 25 * 1024 * 1024;
+    const MAX_EXTRACT = 25 * 1024 * 1024;
+
+    function updateCapacityDisplay(file, method) {
+      if (!file) { capacityInfo.textContent = 'Capacity: —'; return; }
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (autoCompress.checked) {
+          const m = parseInt(maxDim.value || '1600', 10);
+          const s = Math.min(1, m / Math.max(w, h));
+          w = Math.max(1, Math.floor(w * s));
+          h = Math.max(1, Math.floor(h * s));
+        }
+        const cap = method === 'dct' ? dctCapacity(w, h) : lsbCapacity(w, h);
+        const msgBytes = utf8Length(secretText.value);
+        const ok = msgBytes <= cap;
+        capacityInfo.textContent = `Capacity (~): ${cap} bytes • Message: ${msgBytes} bytes`;
+        capacityInfo.className = `text-xs mt-2 ${ok ? 'text-emerald-600' : 'text-red-600'}`;
+        capacityWarn.classList.toggle('hidden', ok);
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    }
+
+    function resizeImageBlob(file, method) {
+      return new Promise((resolve, reject) => {
+        try {
+          const url = URL.createObjectURL(file);
+          const img = new Image();
+          img.onload = () => {
+            const m = parseInt(maxDim.value || '1600', 10);
+            const s = Math.min(1, m / Math.max(img.naturalWidth, img.naturalHeight));
+            const w = Math.max(1, Math.floor(img.naturalWidth * s));
+            const h = Math.max(1, Math.floor(img.naturalHeight * s));
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const type = method === 'dct' ? 'image/jpeg' : 'image/png';
+            const q = 0.85;
+            canvas.toBlob(b => { URL.revokeObjectURL(url); resolve(b || file); }, type, q);
+          };
+          img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+          img.src = url;
+        } catch { resolve(file); }
+      });
+    }
+
+    function updateQualityVisibility() {
+      const fmt = document.getElementById('outFormat').value;
+      const hide = fmt === 'png';
+      qualityGroup.classList.toggle('hidden', hide);
+    }
+
+    cover.addEventListener('change', () => {
+      const f = cover.files[0];
+      if (!f) return;
+      if (!(f.type || '').startsWith('image/')) { showToast('Only image files are allowed'); cover.value = ''; return; }
+      const method = document.getElementById('method').value;
+      if (f.size > MAX_HIDE && !autoCompress.checked) { showToast('Image too large'); cover.value = ''; return; }
+      if (autoCompress.checked) {
+        resizeImageBlob(f, method).then(b => {
+          coverOverrideBlob = b;
+          const u = URL.createObjectURL(b);
+          coverPreview.src = u;
+          coverPreview.classList.remove('hidden');
+          updateCapacityDisplay(b, method);
+        });
+      } else {
+        coverOverrideBlob = null;
+        const url = URL.createObjectURL(f);
+        coverPreview.src = url;
+        coverPreview.classList.remove('hidden');
+        updateCapacityDisplay(f, method);
+      }
+    });
+    document.getElementById('method').addEventListener('change', () => {
+      const meth = document.getElementById('method').value;
+      const fmtSel = document.getElementById('outFormat');
+      if (meth === 'lsb' && fmtSel.value !== 'png') { fmtSel.value = 'png'; showToast('LSB requires PNG — format set to PNG'); }
+      const f = coverOverrideBlob || cover.files[0];
+      if (f) updateCapacityDisplay(f, meth);
+      updateQualityVisibility();
+    });
+
+    document.getElementById('outFormat').addEventListener('change', () => {
+      const fmt = document.getElementById('outFormat').value;
+      const methSel = document.getElementById('method');
+      if (fmt !== 'png' && methSel.value === 'lsb') { methSel.value = 'dct'; showToast('JPEG/WEBP require DCT — method set to DCT'); }
+      updateQualityVisibility();
+      const f = coverOverrideBlob || cover.files[0];
+      if (f) updateCapacityDisplay(f, methSel.value);
+    });
+
+    qualitySlider.addEventListener('input', () => { qualityLabel.textContent = qualitySlider.value; });
+    qualityLabel.textContent = qualitySlider.value;
+
+    updateQualityVisibility();
+
+    function wireDrop(zone, input) {
+      zone.addEventListener('click', () => input.click());
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('border-cyan-400'); });
+      zone.addEventListener('dragleave', e => { zone.classList.remove('border-cyan-400'); });
+      zone.addEventListener('drop', e => {
+        e.preventDefault(); zone.classList.remove('border-cyan-400');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          input.files = e.dataTransfer.files; input.dispatchEvent(new Event('change'));
+        }
+      });
+    }
+    wireDrop(coverDrop, cover);
+    wireDrop(stegoDrop, stego);
+
+    stego.addEventListener('change', () => {
+      const f = stego.files[0];
+      if (!f) return;
+      if (!(f.type || '').startsWith('image/')) { showToast('Only image files are allowed'); stego.value = ''; return; }
+      if (f.size > MAX_EXTRACT) { showToast('Image too large'); stego.value = ''; return; }
+      const url = URL.createObjectURL(f);
+      stegoPreview.src = url;
+      stegoPreview.classList.remove('hidden');
+    });
+    secretText.addEventListener('input', () => {
+      textCount.textContent = `${secretText.value.length} chars`;
+      if (cover.files[0]) updateCapacityDisplay(cover.files[0], document.getElementById('method').value);
+    });
+
+    selectTextBtn.addEventListener('click', () => textFile.click());
+    textFile.addEventListener('change', () => {
+      const f = textFile.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        secretText.value = reader.result || '';
+        textCount.textContent = `${secretText.value.length} chars`;
+        if (cover.files[0]) updateCapacityDisplay(cover.files[0], document.getElementById('method').value);
+        textFileName.textContent = `${f.name} (${f.size} bytes)`;
+        showToast('Loaded text file');
+      };
+      reader.onerror = () => { showToast('Failed to read file'); };
+      reader.readAsText(f);
+    });
+
+    hideBtn.addEventListener('click', async () => {
+      resultText.textContent = '';
+      const f = cover.files[0];
+      const password = document.getElementById('passwordHide').value;
+      const method = document.getElementById('method').value;
+      const delta = document.getElementById('delta').value;
+      const quality = qualitySlider.value;
+      let outFormat = document.getElementById('outFormat').value;
+      const text = secretText.value;
+      if (!f || !password || !text) { hideMsg.textContent = 'Provide image, password, text'; return; }
+      if (!(f.type || '').startsWith('image/')) { hideMsg.textContent = 'Only image files are allowed'; return; }
+      if (f.size > MAX_HIDE && !autoCompress.checked) { hideMsg.textContent = 'Image too large'; return; }
+      setLoading(hideBtn, true);
+      const fd = new FormData();
+      let toUpload = f;
+      if (autoCompress.checked) {
+        try { toUpload = await resizeImageBlob(f, method); } catch {}
+      }
+      fd.append('cover', toUpload, method === 'dct' ? 'cover.jpg' : 'cover.png');
+      fd.append('password', password);
+      fd.append('text', text);
+      fd.append('method', method);
+      fd.append('delta', delta);
+      fd.append('quality', quality);
+      if (method === 'lsb' && outFormat !== 'png') { outFormat = 'png'; document.getElementById('outFormat').value = 'png'; showToast('LSB requires PNG — downloading PNG'); }
+      fd.append('out_format', outFormat);
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/hide');
+      xhr.responseType = 'blob';
+      hideProgress.classList.remove('hidden');
+      hideProgressBar.style.width = '0%';
+      hideProgressText.textContent = '0%';
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const p = Math.round((e.loaded / e.total) * 100);
+        hideProgressBar.style.width = p + '%';
+        hideProgressText.textContent = p + '%';
+      }
+    };
+    xhr.onload = () => {
+      setLoading(hideBtn, false);
+      hideProgress.classList.add('hidden');
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const url = URL.createObjectURL(xhr.response);
+        const ext = outFormat || 'png';
+        const a = document.createElement('a'); a.href = url; a.download = 'stego.' + ext; a.click();
+        hideMsg.textContent = 'Downloaded stego.' + ext;
+        stegoPreviewOut.src = url; stegoPreviewOut.classList.remove('hidden');
+        downloadLink.href = url; downloadLink.setAttribute('download', 'stego.' + ext); downloadLink.classList.remove('hidden');
+        showToast('Hide successful');
+      } else {
+        try {
+          const reader = new FileReader();
+          reader.onload = () => {
+            let msg = 'Hide failed';
+            try { const j = JSON.parse(reader.result || '{}'); msg = mapHideError(j.error); } catch {}
+            hideMsg.textContent = msg;
+            showToast(msg);
+          };
+          reader.readAsText(xhr.response);
+        } catch {
+          hideMsg.textContent = 'Hide failed';
+          showToast('Hide failed');
+        }
+      }
+    };
+    xhr.onerror = () => { setLoading(hideBtn, false); hideProgress.classList.add('hidden'); hideMsg.textContent = 'Network error'; showToast('Hide failed'); };
+    xhr.send(fd);
+    });
+
+    extractBtn.addEventListener('click', async () => {
+      resultText.textContent = '';
+      const f = stego.files[0];
+      const password = document.getElementById('passwordExtract').value;
+    if (!f || !password) { resultText.textContent = 'Provide image and password'; return; }
+    if (!(f.type || '').startsWith('image/')) { resultText.textContent = 'Only image files are allowed'; return; }
+    if (f.size > MAX_EXTRACT) { resultText.textContent = 'Image too large'; return; }
+      setLoading(extractBtn, true);
+      const fd = new FormData();
+      fd.append('stego', f);
+      fd.append('password', password);
+    const xhr2 = new XMLHttpRequest();
+    xhr2.open('POST', '/extract');
+    xhr2.responseType = 'json';
+    extractProgress.classList.remove('hidden');
+    extractProgressBar.style.width = '0%';
+    extractProgressText.textContent = '0%';
+    xhr2.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const p = Math.round((e.loaded / e.total) * 100);
+        extractProgressBar.style.width = p + '%';
+        extractProgressText.textContent = p + '%';
+      }
+    };
+    xhr2.onload = () => {
+      setLoading(extractBtn, false);
+      extractProgress.classList.add('hidden');
+      if (xhr2.status >= 200 && xhr2.status < 300) {
+        const j = xhr2.response || {};
+        resultText.textContent = j.text || '';
+        showToast('Extract successful');
+      } else {
+        const j = xhr2.response || {};
+        const msg = mapExtractError(j.error);
+        resultText.textContent = msg;
+        showToast('Extract failed');
+      }
+    };
+    xhr2.onerror = () => { setLoading(extractBtn, false); extractProgress.classList.add('hidden'); resultText.textContent = 'Network error'; showToast('Extract failed'); };
+    xhr2.send(fd);
+    });
+
+    copyText.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(resultText.textContent); showToast('Copied'); } catch {}
+    });
+    saveText.addEventListener('click', () => {
+      const blob = new Blob([resultText.textContent], {type: 'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'extracted.txt'; a.click(); URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
