@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stegano-Cipher Web</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes gridShift {
+      0% {
+        background-position: 0 0, 0 0;
+      }
+
+      100% {
+        background-position: 0 20px, 20px 0;
+      }
+    }
+
+    @keyframes scan {
+      0% {
+        background-position-y: 0;
+      }
+
+      100% {
+        background-position-y: 100%;
+      }
+    }
+  </style>
+  <style id="themeOverrides">
+/* Light Mode */
+body[data-theme="light"] {
+  background: #f3f4f6;
+  color: #111827;
+}
+body[data-theme="light"] .text-white { color: #111827 !important; }
+body[data-theme="light"] .text-cyan-200 { color: #4b5563 !important; }
+body[data-theme="light"] .text-cyan-50 { color: #111827 !important; }
+body[data-theme="light"] .bg-black\/50, body[data-theme="light"] .bg-black\/80 { background-color: #ffffff !important; }
+body[data-theme="light"] .bg-black\/40 { background-color: #f9fafb !important; }
+body[data-theme="light"] .border-cyan-400\/60, body[data-theme="light"] .border-cyan-400\/40, body[data-theme="light"] .border-cyan-500\/50, body[data-theme="light"] .border-cyan-500\/30 { border-color: #d1d5db !important; }
+body[data-theme="light"] .border-cyan-400 { border-color: #9ca3af !important; }
+body[data-theme="light"] .ring-cyan-400\/50 { --tw-ring-color: #d1d5db !important; }
+body[data-theme="light"] .shadow-\[0_0_24px_\#00f0ff\], body[data-theme="light"] .shadow-\[0_0_24px_rgba\(0\,240\,255\,0\.3\)\] { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important; }
+body[data-theme="light"] .shadow-\[0_0_12px_\#00f0ff\] { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important; }
+body[data-theme="light"] .shadow-\[0_0_10px_rgba\(0\,240\,255\,0\.5\)\], body[data-theme="light"] .shadow-\[0_0_20px_rgba\(0\,240\,255\,0\.5\)\] { box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important; }
+body[data-theme="light"] .hover\:shadow-\[0_0_30px_rgba\(0\,240\,255\,0\.8\)\]:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15) !important; }
+body[data-theme="light"] .bg-cyan-600 { background-color: #3b82f6 !important; color: white !important; }
+body[data-theme="light"] .bg-cyan-600\/30 { background-color: #eff6ff !important; }
+body[data-theme="light"] .bg-cyan-500 { background-color: #3b82f6 !important; color: white !important; }
+body[data-theme="light"] .bg-cyan-900\/50 { background-color: #f3f4f6 !important; color: #111827 !important; border-color: #d1d5db !important;}
+body[data-theme="light"] .bg-cyan-500\/80 { background-color: #bfdbfe !important; color: #111827 !important; }
+body[data-theme="light"] .hover\:bg-cyan-300:hover, body[data-theme="light"] .hover\:bg-cyan-500:hover { background-color: #dbeafe !important; color: #1d4ed8 !important; }
+body[data-theme="light"] .hover\:text-white:hover { color: #1d4ed8 !important; }
+body[data-theme="light"] .accent-cyan-400 { accent-color: #3b82f6 !important; }
+body[data-theme="light"] #mainBgGrad, body[data-theme="light"] .cyber-element { display: none !important; }
+body[data-theme="light"] .bg-clip-text { background-image: linear-gradient(90deg, #1d4ed8, #7e22ce) !important; -webkit-background-clip: text; background-clip: text; color: transparent !important; }
+body[data-theme="light"] input, body[data-theme="light"] textarea, body[data-theme="light"] select { background-color: #ffffff !important; color: #111827 !important; border-color: #d1d5db !important; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05) !important; }
+body[data-theme="light"] input::placeholder, body[data-theme="light"] textarea::placeholder { color: #9ca3af !important; }
+body[data-theme="light"] select option { color: #111827 !important; background: #ffffff !important;}
+
+/* Dark Mode */
+body[data-theme="dark"] {
+  background: #111827;
+  color: #f3f4f6;
+}
+body[data-theme="dark"] .text-white { color: #f3f4f6 !important; }
+body[data-theme="dark"] .text-cyan-200 { color: #9ca3af !important; }
+body[data-theme="dark"] .text-cyan-50 { color: #f3f4f6 !important; }
+body[data-theme="dark"] .bg-black\/50, body[data-theme="dark"] .bg-black\/80 { background-color: #1f2937 !important; }
+body[data-theme="dark"] .bg-black\/40 { background-color: #374151 !important; }
+body[data-theme="dark"] .border-cyan-400\/60, body[data-theme="dark"] .border-cyan-400\/40, body[data-theme="dark"] .border-cyan-500\/50, body[data-theme="dark"] .border-cyan-500\/30 { border-color: #4b5563 !important; }
+body[data-theme="dark"] .border-cyan-400 { border-color: #6b7280 !important; }
+body[data-theme="dark"] .ring-cyan-400\/50 { --tw-ring-color: #4b5563 !important; }
+body[data-theme="dark"] .shadow-\[0_0_24px_\#00f0ff\], body[data-theme="dark"] .shadow-\[0_0_24px_rgba\(0\,240\,255\,0\.3\)\] { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important; }
+body[data-theme="dark"] .shadow-\[0_0_12px_\#00f0ff\] { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4) !important; }
+body[data-theme="dark"] .shadow-\[0_0_10px_rgba\(0\,240\,255\,0\.5\)\], body[data-theme="dark"] .shadow-\[0_0_20px_rgba\(0\,240\,255\,0\.5\)\] { box-shadow: 0 2px 5px rgba(0,0,0,0.3) !important; }
+body[data-theme="dark"] .hover\:shadow-\[0_0_30px_rgba\(0\,240\,255\,0\.8\)\]:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5) !important; }
+body[data-theme="dark"] .bg-cyan-600 { background-color: #4b5563 !important; color: #f3f4f6 !important;}
+body[data-theme="dark"] .bg-cyan-600\/30 { background-color: #374151 !important; }
+body[data-theme="dark"] .bg-cyan-500 { background-color: #4b5563 !important; color: #f3f4f6 !important;}
+body[data-theme="dark"] .bg-cyan-900\/50 { background-color: #1f2937 !important; color: #f3f4f6 !important; border-color: #4b5563 !important;}
+body[data-theme="dark"] .bg-cyan-500\/80 { background-color: #374151 !important; color: #f3f4f6 !important; }
+body[data-theme="dark"] .hover\:bg-cyan-300:hover, body[data-theme="dark"] .hover\:bg-cyan-500:hover { background-color: #111827 !important; border-color: #9ca3af !important; color: white !important; }
+body[data-theme="dark"] .hover\:text-white:hover { color: #f3f4f6 !important; }
+body[data-theme="dark"] .accent-cyan-400 { accent-color: #9ca3af !important; }
+body[data-theme="dark"] #mainBgGrad, body[data-theme="dark"] .cyber-element { display: none !important; }
+body[data-theme="dark"] .bg-clip-text { background-image: linear-gradient(90deg, #9ca3af, #d1d5db) !important; -webkit-background-clip: text; background-clip: text; color: transparent !important; }
+body[data-theme="dark"] input, body[data-theme="dark"] textarea, body[data-theme="dark"] select { background-color: #111827 !important; color: #f3f4f6 !important; border-color: #4b5563 !important; }
+body[data-theme="dark"] input::placeholder, body[data-theme="dark"] textarea::placeholder { color: #6b7280 !important; }
+body[data-theme="dark"] select option { color: #f3f4f6 !important; background: #111827 !important;}
+  </style>
+</head>
+
+<body class="text-white relative" data-theme="cyber">
+  <div class="absolute inset-0 -z-10" id="mainBgGrad">
+    <div class="h-full w-full"
+      style="background: radial-gradient(ellipse at center, #0a0f1f 0%, #050914 40%, #02040a 100%);"></div>
+    <div class="absolute inset-0 opacity-30"
+      style="background-image: repeating-linear-gradient(0deg, rgba(0,240,255,0.08) 0 2px, transparent 2px 20px), repeating-linear-gradient(90deg, rgba(255,0,255,0.06) 0 2px, transparent 2px 20px); background-size: 100% 100%; animation: gridShift 12s linear infinite;">
+    </div>
+    <div class="absolute inset-0"
+      style="background-image: linear-gradient(transparent, rgba(255,255,255,0.03) 50%, transparent); background-size: 100% 4px; animation: scan 6s linear infinite;">
+    </div>
+  </div>
+  <div class="max-w-5xl mx-auto py-8 px-4" id="appRoot">
+    <div class="flex items-center justify-between">
+      <h1 class="leading-tight">
+        <span class="block text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent"
+          style="background-image: linear-gradient(90deg,#00f0ff,#ff00ff)">Stegano-Cipher</span>
+        <span class="block text-cyan-200 md:text-xl font-medium">Robust Image Steganography with AES-256-GCM</span>
+      </h1>
+      <div class="flex items-center gap-3 text-sm">
+        <select id="themeSelector" class="bg-black/40 border border-cyan-400/60 text-cyan-200 rounded px-2 py-1 outline-none text-xs" style="transition:all 0.3s">
+          <option value="cyber">Cyber</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+        <a href="/profile"
+          class="h-8 w-8 rounded-full bg-cyan-600 text-white flex items-center justify-center font-semibold">
+          {{ (user.name if user else '')[:1]|upper }}
+        </a>
+        <div
+          class="flex items-center gap-2 rounded-xl border border-cyan-400/60 bg-black/40 backdrop-blur px-2 py-1 shadow-[0_0_12px_#00f0ff]">
+          <a href="/history"
+            class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">History</a>
+          {% if user and (user.role == 'admin') %}
+          <a href="/admin/history"
+            class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Admin</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <p class="text-cyan-200 mt-2">Hide and extract messages in images in your browser</p>
+
+    <div id="toast" class="fixed top-4 right-4 hidden bg-black/80 text-white rounded px-3 py-2 text-sm"></div>
+
+    <div class="mt-6 grid md:grid-cols-2 gap-6">
+      <div class="bg-black/50 backdrop-blur rounded-lg shadow-[0_0_24px_#00f0ff] ring-1 ring-cyan-400/50 p-4"
+        id="hideCard">
+        <h2 class="text-lg font-semibold">Hide Text</h2>
+        <div class="mt-3">
+          <label class="block text-sm text-cyan-200">Cover Image</label>
+          <div id="coverDrop"
+            class="mt-1 w-full border-2 border-dashed rounded p-4 text-center text-cyan-200 border-cyan-400/60">Drag &
+            drop image here or click to select</div>
+          <input id="cover" type="file" accept="image/*" class="hidden" />
+          <img id="coverPreview" class="mt-3 w-full max-h-64 object-contain hidden" />
+          <div id="capacityInfo" class="text-xs text-cyan-200 mt-2">Capacity: —</div>
+          <div id="capacityWarn" class="mt-2 hidden bg-rose-500/20 text-rose-300 rounded px-2 py-1 text-xs">Secret text
+            may exceed image capacity</div>
+          <div class="mt-2 grid md:grid-cols-2 gap-2 text-xs">
+            <label class="inline-flex items-center gap-2"><input id="autoCompress" type="checkbox"
+                class="accent-cyan-400" checked /><span class="text-cyan-200">Auto-resize/compress</span></label>
+            <div class="flex items-center gap-2"><span class="text-cyan-200">Max size</span><input id="maxDim"
+                type="number" value="1600" class="w-20 rounded border border-cyan-400/60 bg-black/40 text-white p-1" />
+            </div>
+          </div>
+        </div>
+        <div class="mt-3">
+          <label class="block text-sm text-cyan-200">Secret Text</label>
+          <textarea id="secretText"
+            class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            rows="6"></textarea>
+          <div id="textCount" class="text-xs text-cyan-200 mt-1">0 chars</div>
+          <div class="mt-2 flex items-center gap-2">
+            <button id="selectTextBtn"
+              class="rounded px-2 py-1 border border-cyan-400 text-cyan-200 hover:bg-cyan-300 hover:text-black">Select
+              Text File</button>
+            <span id="textFileName" class="text-xs text-cyan-200"></span>
+            <input id="textFile" type="file" accept="text/plain,.txt" class="hidden" />
+          </div>
+        </div>
+        <div class="mt-3 grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm text-cyan-200" id="passwordHideLabel">Password</label>
+            <input id="passwordHide" type="password"
+              class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+          </div>
+        </div>
+        <div class="mt-4 flex flex-col gap-2">
+          <label class="inline-flex items-center gap-2 cursor-pointer w-fit">
+            <input id="qrModeHide" type="checkbox" class="accent-cyan-400" />
+            <span class="text-sm text-cyan-200">Encode as QR Image Payload</span>
+          </label>
+          <label class="inline-flex items-center gap-2 cursor-pointer w-fit">
+            <input id="selfDestructHide" type="checkbox" class="accent-cyan-400" />
+            <span class="text-sm text-rose-300 font-medium">Self-Destruct Mode (Server Enforced)</span>
+          </label>
+        </div>
+        <div id="selfDestructOptions"
+          class="mt-3 grid grid-cols-2 gap-3 hidden p-3 rounded bg-black/40 border border-rose-500/30">
+          <div>
+            <label class="block text-sm text-cyan-200">Max Views</label>
+            <input id="maxViews" type="number" min="1" max="10" value="1"
+              class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+          </div>
+          <div>
+            <label class="block text-sm text-cyan-200">Expires In</label>
+            <select id="expiresIn"
+              class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+              <option value="1">1 Hour</option>
+              <option value="24" selected>24 Hours</option>
+              <option value="168">7 Days</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-3 grid grid-cols-2 gap-3">
+          <div id="qualityGroup">
+            <label class="block text-sm text-cyan-200">Output Quality (JPEG/WEBP)</label>
+            <div class="flex items-center gap-2 mt-1">
+              <input id="qualitySlider" type="range" min="60" max="100" step="1" value="92" class="flex-1" />
+              <span id="qualityLabel" class="text-cyan-200">92</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3">
+          <label class="block text-sm text-cyan-200">Output Format</label>
+          <select id="outFormat" class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2">
+            <option value="png" selected>PNG (lossless)</option>
+            <option value="jpg">JPEG</option>
+            <option value="webp">WEBP</option>
+          </select>
+        </div>
+        <button id="hideBtn"
+          class="mt-4 w-full rounded p-2 border border-cyan-400 text-cyan-200 hover:text-black hover:bg-cyan-300 transition shadow-[0_0_12px_#00f0ff]">Hide
+          & Download Stego</button>
+        <div id="hideProgress" class="mt-2 hidden">
+          <div class="h-2 bg-black/40 border border-cyan-400/60 rounded">
+            <div id="hideProgressBar" class="h-2 bg-cyan-400 rounded" style="width:0%"></div>
+          </div>
+          <div id="hideProgressText" class="text-xs text-cyan-200 mt-1">0%</div>
+        </div>
+        <div id="hideMsg" class="mt-2 text-sm"></div>
+        <img id="stegoPreviewOut" class="mt-3 w-full max-h-64 object-contain hidden" />
+        <a id="downloadLink" href="#" download="stego.png"
+          class="hidden mt-2 inline-block rounded px-3 py-1 border border-cyan-400 text-cyan-200 hover:text-black hover:bg-cyan-300">Download
+          again</a>
+      </div>
+
+      <div class="bg-black/50 backdrop-blur rounded-lg shadow-[0_0_24px_#00f0ff] ring-1 ring-cyan-400/50 p-4"
+        id="extractCard">
+        <h2 class="text-lg font-semibold">Extract Text</h2>
+        <div class="mt-3">
+          <label class="block text-sm text-cyan-200">Stego Image</label>
+          <div id="stegoDrop"
+            class="mt-1 w-full border-2 border-dashed rounded p-4 text-center text-cyan-200 border-cyan-400/60">Drag &
+            drop image here or click to select</div>
+          <input id="stego" type="file" accept="image/*" class="hidden" />
+          <img id="stegoPreview" class="mt-3 w-full max-h-64 object-contain hidden" />
+        </div>
+        <div class="mt-3">
+          <label class="block text-sm text-cyan-200">Password</label>
+          <input id="passwordExtract" type="password"
+            class="mt-1 w-full rounded border border-cyan-400/60 bg-black/40 text-white p-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+        </div>
+        <button id="extractBtn"
+          class="mt-4 w-full rounded p-2 border border-cyan-400 text-cyan-200 hover:text-black hover:bg-cyan-300 transition shadow-[0_0_12px_#00f0ff]">Extract</button>
+        <div id="extractProgress" class="mt-2 hidden">
+          <div class="h-2 bg-black/40 border border-cyan-400/60 rounded">
+            <div id="extractProgressBar" class="h-2 bg-cyan-400 rounded" style="width:0%"></div>
+          </div>
+          <div id="extractProgressText" class="text-xs text-cyan-200 mt-1">0%</div>
+        </div>
+        <div class="mt-3">
+          <div class="flex gap-2 mb-2">
+            <button id="copyText"
+              class="rounded px-2 py-1 border border-cyan-400 text-cyan-200 hover:bg-cyan-300 hover:text-black">Copy</button>
+            <button id="saveText"
+              class="rounded px-2 py-1 border border-cyan-400 text-cyan-200 hover:bg-cyan-300 hover:text-black">Save
+              .txt</button>
+            <button id="toggleQRBtn"
+              class="hidden rounded px-2 py-1 border border-cyan-400 text-cyan-200 hover:bg-cyan-300 hover:text-black">Show
+              QR</button>
+          </div>
+          <div id="resultText"
+            class="whitespace-pre-wrap rounded border border-cyan-400/60 bg-black/40 text-white p-3 min-h-24"></div>
+
+          <div id="qrCodeContainer" class="mt-4 hidden text-center">
+            <p class="text-sm text-cyan-200 mb-2">Message QR Code</p>
+            <img id="qrCodeImage" class="mx-auto rounded border border-cyan-400/60 bg-white p-2 object-contain"
+              style="max-width: 200px;" />
+            <a id="qrDownloadLink" download="secret_extracted_qr.png"
+              class="mt-2 text-xs inline-block rounded px-3 py-1 border border-cyan-400 text-cyan-200 hover:text-black hover:bg-cyan-300 transition block w-fit mx-auto cursor-pointer">Download
+              QR</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const themeSelector = document.getElementById('themeSelector');
+    const storedTheme = localStorage.getItem('theme') || 'cyber';
+    document.body.setAttribute('data-theme', storedTheme);
+    themeSelector.value = storedTheme;
+
+    themeSelector.addEventListener('change', (e) => {
+      document.body.setAttribute('data-theme', e.target.value);
+      localStorage.setItem('theme', e.target.value);
+    });
+  </script>
+
+  <script>
+    const MAX_HIDE = 50 * 1024 * 1024;
+    const MAX_EXTRACT = 25 * 1024 * 1024;
+
+    const cover = document.getElementById('cover');
+    const coverPreview = document.getElementById('coverPreview');
+    const coverDrop = document.getElementById('coverDrop');
+    const capacityInfo = document.getElementById('capacityInfo');
+    const stego = document.getElementById('stego');
+    const stegoPreview = document.getElementById('stegoPreview');
+    const stegoDrop = document.getElementById('stegoDrop');
+    const secretText = document.getElementById('secretText');
+    const textCount = document.getElementById('textCount');
+    const hideBtn = document.getElementById('hideBtn');
+    const extractBtn = document.getElementById('extractBtn');
+    const hideMsg = document.getElementById('hideMsg');
+    const resultText = document.getElementById('resultText');
+    const toast = document.getElementById('toast');
+    const stegoPreviewOut = document.getElementById('stegoPreviewOut');
+    const downloadLink = document.getElementById('downloadLink');
+    const copyText = document.getElementById('copyText');
+    const saveText = document.getElementById('saveText');
+    const selectTextBtn = document.getElementById('selectTextBtn');
+    const textFile = document.getElementById('textFile');
+    const textFileName = document.getElementById('textFileName');
+    const hideProgress = document.getElementById('hideProgress');
+    const hideProgressBar = document.getElementById('hideProgressBar');
+    const hideProgressText = document.getElementById('hideProgressText');
+    const extractProgress = document.getElementById('extractProgress');
+    const extractProgressBar = document.getElementById('extractProgressBar');
+    const extractProgressText = document.getElementById('extractProgressText');
+    const capacityWarn = document.getElementById('capacityWarn');
+    const autoCompress = document.getElementById('autoCompress');
+    const maxDim = document.getElementById('maxDim');
+    const qualityGroup = document.getElementById('qualityGroup');
+    const qualitySlider = document.getElementById('qualitySlider');
+    const qualityLabel = document.getElementById('qualityLabel');
+    let coverOverrideBlob = null;
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 2000);
+    }
+
+    function setLoading(btn, loading) {
+      btn.disabled = loading;
+      btn.classList.toggle('opacity-60', loading);
+      btn.textContent = loading ? (btn === hideBtn ? 'Processing…' : 'Extracting…') : (btn === hideBtn ? 'Hide & Download Stego' : 'Extract');
+    }
+
+    function mapHideError(code) {
+      if (code === 'type') return 'Only image files are allowed';
+      if (code === 'size') return 'Image too large';
+      if (code === 'missing inputs') return 'Provide image, password, text';
+      return 'Hide failed';
+    }
+    function mapExtractError(code) {
+      if (code === 'type') return 'Only image files are allowed';
+      if (code === 'size') return 'Image too large';
+      if (code === 'missing inputs') return 'Provide image and password';
+      if (code === 'header') return 'No embedded header found';
+      if (code === 'decrypt') return 'Wrong password or corrupted image';
+      return 'Error extracting';
+    }
+
+    function utf8Length(str) { return new TextEncoder().encode(str).length; }
+    function lsbCapacity(w, h) { return Math.floor((w * h) / 8); }
+
+    function updateCapacityDisplay(file, method) {
+      if (!file) {
+        capacityInfo.textContent = '';
+        capacityWarn.classList.add('hidden');
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        const cap = lsbCapacity(w, h);
+        const msgBytes = utf8Length(secretText.value);
+        const ok = msgBytes <= cap;
+        capacityInfo.textContent = `Capacity (~): ${cap} bytes • Message: ${msgBytes} bytes`;
+        capacityInfo.className = `text-xs mt-2 ${ok ? 'text-emerald-600' : 'text-red-600'}`;
+        capacityWarn.classList.toggle('hidden', ok);
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    }
+
+    function resizeImageBlob(file, method) {
+      return new Promise((resolve, reject) => {
+        try {
+          const url = URL.createObjectURL(file);
+          const img = new Image();
+          img.onload = () => {
+            const m = parseInt(maxDim.value || '1600', 10);
+            const s = Math.min(1, m / Math.max(img.naturalWidth, img.naturalHeight));
+            const w = Math.max(1, Math.floor(img.naturalWidth * s));
+            const h = Math.max(1, Math.floor(img.naturalHeight * s));
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const type = 'image/png';
+            const q = 0.85;
+            canvas.toBlob(b => { URL.revokeObjectURL(url); resolve(b || file); }, type, q);
+          };
+          img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+          img.src = url;
+        } catch { resolve(file); }
+      });
+    }
+
+    function updateQualityVisibility() {
+      const fmt = document.getElementById('outFormat').value;
+      const hide = fmt === 'png';
+      qualityGroup.classList.toggle('hidden', hide);
+    }
+
+    cover.addEventListener('change', () => {
+      const f = cover.files[0];
+      if (!f) return;
+      if (!(f.type || '').startsWith('image/')) { showToast('Only image files are allowed'); cover.value = ''; return; }
+      if (f.size > MAX_HIDE && !autoCompress.checked) { showToast('Image too large'); cover.value = ''; return; }
+      if (autoCompress.checked) {
+        resizeImageBlob(f, 'lsb').then(b => {
+          coverOverrideBlob = b;
+          const u = URL.createObjectURL(b);
+          coverPreview.src = u;
+          coverPreview.classList.remove('hidden');
+          updateCapacityDisplay(b, 'lsb');
+        });
+      } else {
+        coverOverrideBlob = null;
+        const url = URL.createObjectURL(f);
+        coverPreview.src = url;
+        coverPreview.classList.remove('hidden');
+        updateCapacityDisplay(f, 'lsb');
+      }
+    });
+
+    document.getElementById('outFormat').addEventListener('change', () => {
+      const fmt = document.getElementById('outFormat').value;
+      if (fmt !== 'png') { document.getElementById('outFormat').value = 'png'; showToast('LSB requires PNG — format set to PNG'); }
+      updateQualityVisibility();
+      const f = coverOverrideBlob || cover.files[0];
+      if (f) updateCapacityDisplay(f, 'lsb');
+    });
+
+    qualitySlider.addEventListener('input', () => { qualityLabel.textContent = qualitySlider.value; });
+    qualityLabel.textContent = qualitySlider.value;
+
+    updateQualityVisibility();
+
+    function wireDrop(zone, input) {
+      zone.addEventListener('click', () => input.click());
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('border-cyan-400'); });
+      zone.addEventListener('dragleave', e => { zone.classList.remove('border-cyan-400'); });
+      zone.addEventListener('drop', e => {
+        e.preventDefault(); zone.classList.remove('border-cyan-400');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          input.files = e.dataTransfer.files; input.dispatchEvent(new Event('change'));
+        }
+      });
+    }
+    wireDrop(coverDrop, cover);
+    wireDrop(stegoDrop, stego);
+
+    const selfDestructHide = document.getElementById('selfDestructHide');
+    const selfDestructOptions = document.getElementById('selfDestructOptions');
+    const passwordHide = document.getElementById('passwordHide');
+
+    if (selfDestructHide) {
+      selfDestructHide.addEventListener('change', () => {
+        if (selfDestructHide.checked) {
+          selfDestructOptions.classList.remove('hidden');
+          passwordHide.disabled = true;
+          passwordHide.value = '';
+          passwordHide.classList.add('opacity-50', 'cursor-not-allowed');
+          document.getElementById('passwordHideLabel').textContent = 'Password (Auto-generated)';
+        } else {
+          selfDestructOptions.classList.add('hidden');
+          passwordHide.disabled = false;
+          passwordHide.classList.remove('opacity-50', 'cursor-not-allowed');
+          document.getElementById('passwordHideLabel').textContent = 'Password';
+        }
+      });
+    }
+
+    stego.addEventListener('change', () => {
+      const f = stego.files[0];
+      if (!f) return;
+      if (!(f.type || '').startsWith('image/')) { showToast('Only image files are allowed'); stego.value = ''; return; }
+      if (f.size > MAX_EXTRACT) { showToast('Image too large'); stego.value = ''; return; }
+      const url = URL.createObjectURL(f);
+      stegoPreview.src = url;
+      stegoPreview.classList.remove('hidden');
+    });
+    secretText.addEventListener('input', () => {
+      textCount.textContent = `${secretText.value.length} chars`;
+      if (cover.files[0]) updateCapacityDisplay(cover.files[0], 'lsb');
+    });
+
+    selectTextBtn.addEventListener('click', () => textFile.click());
+    textFile.addEventListener('change', () => {
+      const f = textFile.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        secretText.value = reader.result || '';
+        textCount.textContent = `${secretText.value.length} chars`;
+        if (cover.files[0]) updateCapacityDisplay(cover.files[0], document.getElementById('method').value);
+        textFileName.textContent = `${f.name} (${f.size} bytes)`;
+        showToast('Loaded text file');
+      };
+      reader.onerror = () => { showToast('Failed to read file'); };
+      reader.readAsText(f);
+    });
+
+    hideBtn.addEventListener('click', async () => {
+      resultText.textContent = '';
+      const f = cover.files[0];
+      const password = document.getElementById('passwordHide').value;
+      const quality = qualitySlider.value;
+      let outFormat = document.getElementById('outFormat').value;
+      const text = secretText.value;
+
+      const qrMode = document.getElementById('qrModeHide') ? document.getElementById('qrModeHide').checked : false;
+      const selfDestruct = document.getElementById('selfDestructHide') ? document.getElementById('selfDestructHide').checked : false;
+      const maxViews = document.getElementById('maxViews') ? document.getElementById('maxViews').value : '1';
+      const expiresIn = document.getElementById('expiresIn') ? document.getElementById('expiresIn').value : '24';
+
+      if (!f || !text) { hideMsg.textContent = 'Provide image and text'; return; }
+      if (!selfDestruct && !password) { hideMsg.textContent = 'Provide password'; return; }
+      if (!(f.type || '').startsWith('image/')) { hideMsg.textContent = 'Only image files are allowed'; return; }
+      if (f.size > MAX_HIDE && !autoCompress.checked) { hideMsg.textContent = 'Image too large'; return; }
+      setLoading(hideBtn, true);
+      const fd = new FormData();
+      let toUpload = f;
+      if (autoCompress.checked) {
+        try { toUpload = await resizeImageBlob(f, 'lsb'); } catch { }
+      }
+      fd.append('cover', toUpload, 'cover.png');
+      fd.append('password', password);
+      fd.append('text', text);
+      fd.append('quality', quality);
+      fd.append('qr_mode', qrMode);
+      fd.append('self_destruct', selfDestruct);
+      fd.append('max_views', maxViews);
+      fd.append('expires_in', expiresIn);
+      if (outFormat !== 'png') { outFormat = 'png'; document.getElementById('outFormat').value = 'png'; showToast('LSB requires PNG — downloading PNG'); }
+      fd.append('out_format', outFormat);
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/hide');
+      xhr.responseType = 'blob';
+      hideProgress.classList.remove('hidden');
+      hideProgressBar.style.width = '0%';
+      hideProgressText.textContent = '0%';
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const p = Math.round((e.loaded / e.total) * 100);
+          hideProgressBar.style.width = p + '%';
+          hideProgressText.textContent = p + '%';
+        }
+      };
+      xhr.onload = () => {
+        setLoading(hideBtn, false);
+        hideProgress.classList.add('hidden');
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const url = URL.createObjectURL(xhr.response);
+          const ext = outFormat || 'png';
+          const msgId = xhr.getResponseHeader('X-Self-Destruct-ID');
+          const a = document.createElement('a'); a.href = url; a.download = 'stego.' + ext; a.click();
+
+          if (msgId) {
+            hideMsg.innerHTML = `Downloaded stego.${ext}<br><span class="text-rose-400 font-bold tracking-wider mt-2 block bg-black/40 border border-rose-500/30 p-2 rounded">Message ID: ${msgId}</span><span class="text-xs text-rose-300 mt-1 block">Give this ID to the recipient instead of a password.</span>`;
+            showToast('Self-Destruct generation complete');
+          } else {
+            hideMsg.textContent = 'Downloaded stego.' + ext;
+            showToast('Hide successful');
+          }
+
+          stegoPreviewOut.src = url; stegoPreviewOut.classList.remove('hidden');
+        } else {
+          try {
+            const reader = new FileReader();
+            reader.onload = () => {
+              let msg = 'Hide failed';
+              try { const j = JSON.parse(reader.result || '{}'); msg = mapHideError(j.error); } catch { }
+              hideMsg.textContent = msg;
+              showToast(msg);
+            };
+            reader.readAsText(xhr.response);
+          } catch {
+            hideMsg.textContent = 'Hide failed';
+            showToast('Hide failed');
+          }
+        }
+      };
+      xhr.onerror = () => { setLoading(hideBtn, false); hideProgress.classList.add('hidden'); hideMsg.textContent = 'Network error'; showToast('Hide failed'); };
+      xhr.send(fd);
+    });
+
+    extractBtn.addEventListener('click', async () => {
+      resultText.textContent = '';
+      if (document.getElementById('qrCodeContainer')) document.getElementById('qrCodeContainer').classList.add('hidden');
+      if (document.getElementById('toggleQRBtn')) document.getElementById('toggleQRBtn').classList.add('hidden');
+      const f = stego.files[0];
+      const password = document.getElementById('passwordExtract').value;
+      if (!f || !password) { resultText.textContent = 'Provide image and password'; return; }
+      if (!(f.type || '').startsWith('image/')) { resultText.textContent = 'Only image files are allowed'; return; }
+      if (f.size > MAX_EXTRACT) { resultText.textContent = 'Image too large'; return; }
+      setLoading(extractBtn, true);
+      const fd = new FormData();
+      fd.append('stego', f);
+      fd.append('password', password);
+      const xhr2 = new XMLHttpRequest();
+      xhr2.open('POST', '/extract');
+      xhr2.responseType = 'json';
+      extractProgress.classList.remove('hidden');
+      extractProgressBar.style.width = '0%';
+      extractProgressText.textContent = '0%';
+      xhr2.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const p = Math.round((e.loaded / e.total) * 100);
+          extractProgressBar.style.width = p + '%';
+          extractProgressText.textContent = p + '%';
+        }
+      };
+      xhr2.onload = () => {
+        setLoading(extractBtn, false);
+        extractProgress.classList.add('hidden');
+        if (xhr2.status >= 200 && xhr2.status < 300) {
+          const j = xhr2.response || {};
+          resultText.textContent = j.text || '';
+          if (j.qr_code && document.getElementById('qrCodeContainer')) {
+            document.getElementById('qrCodeImage').src = j.qr_code;
+            document.getElementById('qrDownloadLink').href = j.qr_code;
+            document.getElementById('toggleQRBtn').classList.remove('hidden');
+            document.getElementById('toggleQRBtn').textContent = 'Show QR';
+            document.getElementById('qrCodeContainer').classList.add('hidden');
+          }
+        } else {
+          const j = xhr2.response || {};
+          const msg = mapExtractError(j.error);
+          resultText.textContent = msg;
+          if (document.getElementById('qrCodeContainer')) document.getElementById('qrCodeContainer').classList.add('hidden');
+          showToast('Extract failed');
+        }
+      };
+      xhr2.onerror = () => { setLoading(extractBtn, false); extractProgress.classList.add('hidden'); resultText.textContent = 'Network error'; showToast('Extract failed'); };
+      xhr2.send(fd);
+    });
+
+    copyText.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(resultText.textContent); showToast('Copied'); } catch { }
+    });
+    saveText.addEventListener('click', () => {
+      const blob = new Blob([resultText.textContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'extracted.txt'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    if (document.getElementById('toggleQRBtn')) {
+      document.getElementById('toggleQRBtn').addEventListener('click', () => {
+        const qrContainer = document.getElementById('qrCodeContainer');
+        const toggleBtn = document.getElementById('toggleQRBtn');
+        if (qrContainer.classList.contains('hidden')) {
+          qrContainer.classList.remove('hidden');
+          toggleBtn.textContent = 'Hide QR';
+        } else {
+          qrContainer.classList.add('hidden');
+          toggleBtn.textContent = 'Show QR';
+        }
+      });
+    }
+  </script>
+  {% include '_stegbot.html' %}
+</body>
+</html>

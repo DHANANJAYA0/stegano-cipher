@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>History • Stegano-Cipher</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes gridShift { 0% { background-position: 0 0, 0 0; } 100% { background-position: 0 20px, 20px 0; } }
+    @keyframes scan { 0% { background-position-y: 0; } 100% { background-position-y: 100%; } }
+  </style>
+  <style id="themeOverrides">
+/* Light Mode */
+body[data-theme="light"] {
+  background: #f3f4f6;
+  color: #111827;
+}
+body[data-theme="light"] .text-white { color: #111827 !important; }
+body[data-theme="light"] .text-cyan-200 { color: #4b5563 !important; }
+body[data-theme="light"] .text-cyan-50 { color: #111827 !important; }
+body[data-theme="light"] .bg-black\/50, body[data-theme="light"] .bg-black\/80 { background-color: #ffffff !important; }
+body[data-theme="light"] .bg-black\/40 { background-color: #f9fafb !important; }
+body[data-theme="light"] .border-cyan-400\/60, body[data-theme="light"] .border-cyan-400\/40, body[data-theme="light"] .border-cyan-500\/50, body[data-theme="light"] .border-cyan-500\/30 { border-color: #d1d5db !important; }
+body[data-theme="light"] .border-cyan-400 { border-color: #9ca3af !important; }
+body[data-theme="light"] .ring-cyan-400\/50 { --tw-ring-color: #d1d5db !important; }
+body[data-theme="light"] .shadow-\[0_0_24px_\#00f0ff\], body[data-theme="light"] .shadow-\[0_0_24px_rgba\(0\,240\,255\,0\.3\)\] { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important; }
+body[data-theme="light"] .shadow-\[0_0_12px_\#00f0ff\] { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important; }
+body[data-theme="light"] .shadow-\[0_0_10px_rgba\(0\,240\,255\,0\.5\)\], body[data-theme="light"] .shadow-\[0_0_20px_rgba\(0\,240\,255\,0\.5\)\] { box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important; }
+body[data-theme="light"] .hover\:shadow-\[0_0_30px_rgba\(0\,240\,255\,0\.8\)\]:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15) !important; }
+body[data-theme="light"] .bg-cyan-600 { background-color: #3b82f6 !important; color: white !important; }
+body[data-theme="light"] .bg-cyan-600\/30 { background-color: #eff6ff !important; }
+body[data-theme="light"] .bg-cyan-500 { background-color: #3b82f6 !important; color: white !important; }
+body[data-theme="light"] .bg-cyan-900\/50 { background-color: #f3f4f6 !important; color: #111827 !important; border-color: #d1d5db !important;}
+body[data-theme="light"] .bg-cyan-500\/80 { background-color: #bfdbfe !important; color: #111827 !important; }
+body[data-theme="light"] .hover\:bg-cyan-300:hover, body[data-theme="light"] .hover\:bg-cyan-500:hover { background-color: #dbeafe !important; color: #1d4ed8 !important; }
+body[data-theme="light"] .hover\:text-white:hover { color: #1d4ed8 !important; }
+body[data-theme="light"] .accent-cyan-400 { accent-color: #3b82f6 !important; }
+body[data-theme="light"] #mainBgGrad, body[data-theme="light"] .cyber-element { display: none !important; }
+body[data-theme="light"] .bg-clip-text { background-image: linear-gradient(90deg, #1d4ed8, #7e22ce) !important; -webkit-background-clip: text; background-clip: text; color: transparent !important; }
+body[data-theme="light"] input, body[data-theme="light"] textarea, body[data-theme="light"] select { background-color: #ffffff !important; color: #111827 !important; border-color: #d1d5db !important; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05) !important; }
+body[data-theme="light"] input::placeholder, body[data-theme="light"] textarea::placeholder { color: #9ca3af !important; }
+body[data-theme="light"] select option { color: #111827 !important; background: #ffffff !important;}
+
+/* Dark Mode */
+body[data-theme="dark"] {
+  background: #111827;
+  color: #f3f4f6;
+}
+body[data-theme="dark"] .text-white { color: #f3f4f6 !important; }
+body[data-theme="dark"] .text-cyan-200 { color: #9ca3af !important; }
+body[data-theme="dark"] .text-cyan-50 { color: #f3f4f6 !important; }
+body[data-theme="dark"] .bg-black\/50, body[data-theme="dark"] .bg-black\/80 { background-color: #1f2937 !important; }
+body[data-theme="dark"] .bg-black\/40 { background-color: #374151 !important; }
+body[data-theme="dark"] .border-cyan-400\/60, body[data-theme="dark"] .border-cyan-400\/40, body[data-theme="dark"] .border-cyan-500\/50, body[data-theme="dark"] .border-cyan-500\/30 { border-color: #4b5563 !important; }
+body[data-theme="dark"] .border-cyan-400 { border-color: #6b7280 !important; }
+body[data-theme="dark"] .ring-cyan-400\/50 { --tw-ring-color: #4b5563 !important; }
+body[data-theme="dark"] .shadow-\[0_0_24px_\#00f0ff\], body[data-theme="dark"] .shadow-\[0_0_24px_rgba\(0\,240\,255\,0\.3\)\] { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important; }
+body[data-theme="dark"] .shadow-\[0_0_12px_\#00f0ff\] { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4) !important; }
+body[data-theme="dark"] .shadow-\[0_0_10px_rgba\(0\,240\,255\,0\.5\)\], body[data-theme="dark"] .shadow-\[0_0_20px_rgba\(0\,240\,255\,0\.5\)\] { box-shadow: 0 2px 5px rgba(0,0,0,0.3) !important; }
+body[data-theme="dark"] .hover\:shadow-\[0_0_30px_rgba\(0\,240\,255\,0\.8\)\]:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5) !important; }
+body[data-theme="dark"] .bg-cyan-600 { background-color: #4b5563 !important; color: #f3f4f6 !important;}
+body[data-theme="dark"] .bg-cyan-600\/30 { background-color: #374151 !important; }
+body[data-theme="dark"] .bg-cyan-500 { background-color: #4b5563 !important; color: #f3f4f6 !important;}
+body[data-theme="dark"] .bg-cyan-900\/50 { background-color: #1f2937 !important; color: #f3f4f6 !important; border-color: #4b5563 !important;}
+body[data-theme="dark"] .bg-cyan-500\/80 { background-color: #374151 !important; color: #f3f4f6 !important; }
+body[data-theme="dark"] .hover\:bg-cyan-300:hover, body[data-theme="dark"] .hover\:bg-cyan-500:hover { background-color: #111827 !important; border-color: #9ca3af !important; color: white !important; }
+body[data-theme="dark"] .hover\:text-white:hover { color: #f3f4f6 !important; }
+body[data-theme="dark"] .accent-cyan-400 { accent-color: #9ca3af !important; }
+body[data-theme="dark"] #mainBgGrad, body[data-theme="dark"] .cyber-element { display: none !important; }
+body[data-theme="dark"] .bg-clip-text { background-image: linear-gradient(90deg, #9ca3af, #d1d5db) !important; -webkit-background-clip: text; background-clip: text; color: transparent !important; }
+body[data-theme="dark"] input, body[data-theme="dark"] textarea, body[data-theme="dark"] select { background-color: #111827 !important; color: #f3f4f6 !important; border-color: #4b5563 !important; }
+body[data-theme="dark"] input::placeholder, body[data-theme="dark"] textarea::placeholder { color: #6b7280 !important; }
+body[data-theme="dark"] select option { color: #f3f4f6 !important; background: #111827 !important;}
+  </style>
+</head>
+<body class="text-white relative" data-theme="cyber">
+  <div class="absolute inset-0 -z-10" id="mainBgGrad">
+    <div class="h-full w-full" style="background: radial-gradient(ellipse at center, #0a0f1f 0%, #050914 40%, #02040a 100%);"></div>
+    <div class="absolute inset-0 opacity-30" style="background-image: repeating-linear-gradient(0deg, rgba(0,240,255,0.08) 0 2px, transparent 2px 20px), repeating-linear-gradient(90deg, rgba(255,0,255,0.06) 0 2px, transparent 2px 20px); background-size: 100% 100%; animation: gridShift 12s linear infinite;"></div>
+    <div class="absolute inset-0" style="background-image: linear-gradient(transparent, rgba(255,255,255,0.03) 50%, transparent); background-size: 100% 4px; animation: scan 6s linear infinite;"></div>
+  </div>
+  <div class="max-w-4xl mx-auto py-8 px-4">
+    <div class="flex items-center justify-between">
+      <h1 class="leading-tight">
+        <span class="block text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent" style="background-image: linear-gradient(90deg,#00f0ff,#ff00ff)">History</span>
+        <span class="block text-cyan-200 md:text-lg">Your activity and actions</span>
+      </h1>
+      <div class="flex items-center gap-3 text-sm">
+        <select id="themeSelector" class="bg-black/40 border border-cyan-400/60 text-cyan-200 rounded px-2 py-1 outline-none text-xs" style="transition:all 0.3s">
+          <option value="cyber">Cyber</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+        <a href="/profile" class="h-8 w-8 rounded-full bg-cyan-600 text-white flex items-center justify-center font-semibold">
+          {{ (user.name if user else '')[:1]|upper }}
+        </a>
+        <div class="flex items-center gap-2 rounded-xl border border-cyan-400/60 bg-black/40 backdrop-blur px-2 py-1 shadow-[0_0_12px_#00f0ff]">
+          <a href="/" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Home</a>
+          <a href="/history" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">History</a>
+          {% if user and (user.role == 'admin') %}
+          <a href="/admin/history" class="inline-flex items-center gap-1 rounded-md border border-cyan-400 px-3 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Admin</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <form method="post" action="/history/clear" class="mt-4">
+      <button class="rounded px-3 py-1 border border-cyan-400 text-cyan-200 hover:text-black hover:bg-cyan-300 transition">Clear My History</button>
+    </form>
+    <form method="get" action="/history" class="mt-2 flex items-center gap-2 text-sm">
+      <label class="text-cyan-200">Items per page</label>
+      <select name="limit" class="rounded border border-cyan-400/60 bg-black/40 text-white p-1">
+        <option value="10" {{ 'selected' if limit == 10 else '' }}>10</option>
+        <option value="20" {{ 'selected' if limit == 20 else '' }}>20</option>
+        <option value="50" {{ 'selected' if limit == 50 else '' }}>50</option>
+      </select>
+      <input type="hidden" name="page" value="1" />
+      <button class="rounded border border-cyan-400 px-2 py-1 text-cyan-200 hover:bg-cyan-300 hover:text-black">Apply</button>
+    </form>
+    <div class="mt-4 space-y-3">
+      {% if items and items|length > 0 %}
+        {% for it in items %}
+        <div class="bg-black/50 backdrop-blur rounded shadow-[0_0_24px_#00f0ff] ring-1 ring-cyan-400/50 p-3">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold">{{ it.type|capitalize }}</div>
+            <div class="text-xs text-cyan-200">{{ it.time }}</div>
+          </div>
+          <div class="text-sm mt-2">
+            {% if it.type == 'hide' %}
+              <div>Cover: {{ it.cover }}</div>
+              <div>Method: {{ it.method }}</div>
+              <div>Text Length: {{ it.length }}</div>
+            {% else %}
+              <div>Stego: {{ it.stego }}</div>
+              <div>Recovered Length: {{ it.length }}</div>
+            {% endif %}
+          </div>
+          <form method="post" action="/history/delete/{{ it.id }}" class="mt-2">
+            <button class="text-rose-300 text-sm">Delete</button>
+          </form>
+        </div>
+        {% endfor %}
+        {% if pages and pages > 1 %}
+        <div class="mt-4 flex justify-center">
+          {% for p in range(1, pages + 1) %}
+          <a href="/history?page={{ p }}&limit={{ limit }}" class="px-3 py-1 mx-1 rounded border {{ 'bg-indigo-600 text-white' if p == page else 'bg-white text-slate-700' }}">{{ p }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% else %}
+        <div class="text-cyan-200">No history yet.</div>
+      {% endif %}
+    </div>
+  </div>
+  </div>
+  <script>
+    const themeSelector = document.getElementById('themeSelector');
+    if (themeSelector) {
+      const storedTheme = localStorage.getItem('theme') || 'cyber';
+      document.body.setAttribute('data-theme', storedTheme);
+      themeSelector.value = storedTheme;
+
+      themeSelector.addEventListener('change', (e) => {
+        document.body.setAttribute('data-theme', e.target.value);
+        localStorage.setItem('theme', e.target.value);
+      });
+    }
+  </script>
+  {% include '_stegbot.html' %}
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!-- StegBot Chat Widget -->
+<div id="stegBotContainer" class="fixed bottom-4 right-4 z-50">
+  <!-- Chat Window -->
+  <div id="stegBotWindow" class="hidden mb-4 w-80 bg-black/80 backdrop-blur-md rounded-2xl border border-cyan-400/60 shadow-[0_0_24px_rgba(0,240,255,0.3)] overflow-hidden flex flex-col transition-all duration-300 transform origin-bottom-right scale-95 opacity-0">
+    <!-- Header -->
+    <div class="bg-cyan-600/30 border-b border-cyan-400/40 p-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-full bg-cyan-500 text-black flex items-center justify-center font-bold">🤖</div>
+        <div>
+          <h3 class="font-semibold text-cyan-50">StegBot</h3>
+          <p class="text-[10px] text-cyan-200">Online & ready to help</p>
+        </div>
+      </div>
+      <button id="closeStegBot" class="text-cyan-200 hover:text-white transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    
+    <!-- Messages Area -->
+    <div id="stegBotMessages" class="p-4 h-64 overflow-y-auto flex flex-col gap-3 text-sm scrollbar-thin scrollbar-thumb-cyan-500 scrollbar-track-transparent">
+      <div class="flex gap-2 w-full">
+        <div class="w-6 h-6 rounded-full bg-cyan-500 flex-shrink-0 flex items-center justify-center text-xs">🤖</div>
+        <div class="bg-cyan-900/50 text-cyan-50 p-2 rounded-lg rounded-tl-none border border-cyan-500/30 max-w-[85%]">
+          Hello! I'm StegBot. I can help you with steganography, how to hide/extract text, or any other app features. How can I assist you today?
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="p-3 border-t border-cyan-400/40 bg-black/40">
+      <form id="stegBotForm" class="flex gap-2">
+        <input type="text" id="stegBotInput" placeholder="Type your message..." class="flex-1 rounded-full bg-black/60 border border-cyan-500/50 text-white px-4 py-2 text-sm focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,240,255,0.5)] placeholder-cyan-500/50" autocomplete="off" />
+        <button type="submit" class="w-10 h-10 rounded-full bg-cyan-600 hover:bg-cyan-500 text-black flex items-center justify-center transition shadow-[0_0_10px_rgba(0,240,255,0.3)]">
+          <svg class="w-4 h-4 translate-x-[1px] translate-y-[1px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toggle Button -->
+  <button id="toggleStegBot" class="w-14 h-14 rounded-full bg-cyan-600 hover:bg-cyan-500 text-black flex items-center justify-center shadow-[0_0_20px_rgba(0,240,255,0.5)] hover:shadow-[0_0_30px_rgba(0,240,255,0.8)] transition ml-auto group relative">
+    <div class="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 border-2 border-black rounded-full shadow-lg"></div>
+    <svg class="w-7 h-7 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+    </svg>
+  </button>
+</div>
+
+<script>
+  // StegBot Logic
+  const stegBotWindow = document.getElementById('stegBotWindow');
+  const toggleStegBot = document.getElementById('toggleStegBot');
+  const closeStegBot = document.getElementById('closeStegBot');
+  const stegBotForm = document.getElementById('stegBotForm');
+  const stegBotInput = document.getElementById('stegBotInput');
+  const stegBotMessages = document.getElementById('stegBotMessages');
+
+  let botOpen = false;
+
+  function toggleBot() {
+    botOpen = !botOpen;
+    if (botOpen) {
+      stegBotWindow.classList.remove('hidden');
+      setTimeout(() => {
+        stegBotWindow.classList.remove('scale-95', 'opacity-0');
+        stegBotWindow.classList.add('scale-100', 'opacity-100');
+      }, 10);
+      stegBotInput.focus();
+      const dot = toggleStegBot.querySelector('.bg-rose-500');
+      if(dot) dot.remove();
+    } else {
+      stegBotWindow.classList.remove('scale-100', 'opacity-100');
+      stegBotWindow.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        stegBotWindow.classList.add('hidden');
+      }, 300);
+    }
+  }
+
+  if (toggleStegBot) toggleStegBot.addEventListener('click', toggleBot);
+  if (closeStegBot) closeStegBot.addEventListener('click', toggleBot);
+
+  function addMessage(text, isUser = false) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `flex gap-2 w-full ${isUser ? 'justify-end' : ''}`;
+    
+    const content = `
+      ${!isUser ? '<div class="w-6 h-6 rounded-full bg-cyan-500 flex-shrink-0 flex items-center justify-center text-xs">🤖</div>' : ''}
+      <div class="${isUser ? 'bg-cyan-500/80 text-black rounded-tr-none' : 'bg-cyan-900/50 text-cyan-50 rounded-tl-none border border-cyan-500/30'} p-2 rounded-lg max-w-[85%] break-words">
+        ${text}
+      </div>
+    `;
+    msgDiv.innerHTML = content;
+    stegBotMessages.appendChild(msgDiv);
+    stegBotMessages.scrollTop = stegBotMessages.scrollHeight;
+  }
+
+  const botResponses = [
+    { keywords: ['hide', 'embed', 'cover'], response: 'To hide text, go to the "Hide Text" card, upload a cover image, type your secret text, and set a password. Then click "Hide & Download Stego".' },
+    { keywords: ['extract', 'decode', 'reveal', 'find'], response: 'To extract a hidden message, upload the stego image in the "Extract Text" section, enter the password you used to hide it, and click "Extract".' },
+    { keywords: ['password', 'auth'], response: 'A password is required to encrypt your hidden text using AES-256-GCM. Without it, the text cannot be extracted.' },
+    { keywords: ['self-destruct', 'destruct', 'expire'], response: 'Self-Destruct mode ensures the hidden message can only be viewed a set number of times or within a specific timeframe enforced by our server.' },
+    { keywords: ['qr', 'qrcode'], response: 'You can encode your secret text as a QR code image payload when hiding it. This allows for easier scanning of the extracted message.' },
+    { keywords: ['hello', 'hi', 'hey'], response: 'Hello! I am StegBot. How can I help you with your steganography tasks today?' },
+    { keywords: ['capacity', 'size', 'max'], response: 'The capacity depends on your image size. For LSB (Least Significant Bit), we hide data in the lowest bit of color channels. The UI calculates capacity automatically when you upload an image.' },
+    { keywords: ['format', 'png', 'jpg', 'jpeg', 'webp'], response: 'For LSB steganography, PNG (lossless) is recommended because JPEG compression might destroy the lowest bits where secret data is hidden.' }
+  ];
+
+  function getBotResponse(input) {
+    const lowerInput = input.toLowerCase();
+    for (const item of botResponses) {
+      for (const kw of item.keywords) {
+        if (lowerInput.includes(kw)) {
+          return item.response;
+        }
+      }
+    }
+    return "I'm StegBot, your virtual assistant! Ask me about hiding or extracting text, passwords, image capacity, or self-destruct mode.";
+  }
+
+  if (stegBotForm) {
+    stegBotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = stegBotInput.value.trim();
+      if (!text) return;
+      
+      addMessage(text, true);
+      stegBotInput.value = '';
+      
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({message: text})
+        });
+        const data = await res.json();
+        addMessage(data.response || "No response received.", false);
+      } catch (err) {
+        // Fallback to static response if API fails
+        addMessage(getBotResponse(text), false);
+      }
+    });
+  }
+</script>
